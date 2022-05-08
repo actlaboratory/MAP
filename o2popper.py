@@ -101,7 +101,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = ini_data['pop_port']
             self.start_init = ini_data['start_init']
 
-            self.remove_header = ini_data['remove_header']
             self.change_env_from = ini_data.get('change_env_from', False) # new
             self.block_list = ini_data.get('block_list', DEFAULT_BLOCK_LIST) # new
             self.block_list_parsed = None
@@ -121,7 +120,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = self.args.pop_port
             self.start_init = False
 
-            self.remove_header = False
             self.change_env_from = False
             self.block_list = DEFAULT_BLOCK_LIST
             self.block_list_parsed = parse_block_list(self.block_list)
@@ -246,7 +244,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             'pop_port': self.pop_port,
             'start_init': self.start_init,
 
-            'remove_header': self.remove_header,
             'change_env_from': self.change_env_from,
             'block_list': self.block_list,
         }

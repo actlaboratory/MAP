@@ -248,27 +248,6 @@ def get_ip():
         s.close()
     return ip
 
-def remove_agent_header(data):
-    i = 0
-    found = False
-    index = []
-    for s in data:
-        if s == b'\r\n':
-            break
-        t = s.lower()
-        if t.startswith(b'user-agent:') or t.startswith(b'x-mailer:'):
-            found = True
-        elif found:
-            t0 = t[:1]
-            if t0 != b' ' and t0 != b'\t':
-                found = False
-        if found:
-            index.append(i)
-        i += 1
-
-    while index:
-        data.pop(index.pop())
-
 async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, start_tls_ctx=None, verbose=None):
     # <<< 220 ... Service ready
     if remote_reader.at_eof():
@@ -653,9 +632,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         data.append(s)
         if s == b'.\r\n':
             break
-
-    if parent.remove_header:
-        remove_agent_header(data)
 
     s = b'DATA\r\n'
     if verbose:

@@ -195,12 +195,6 @@ class Settings(wx.Dialog):
 
         panel3_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # Remove Header
-
-        self.checkbox_remove_header = wx.CheckBox(panel3, label=_("Remove X-Mailer/User-Agent header"))
-
-        panel3_sizer.Add(self.checkbox_remove_header, flag=wx.LEFT|wx.BOTTOM, border=10)
-
         # Change Envelope-From
 
         self.checkbox_change_env_from = wx.CheckBox(panel3, label=_("Change Envelope-From"))
@@ -277,7 +271,6 @@ class Settings(wx.Dialog):
         else:
             self.radio_stop.SetValue(True)
 
-        self.checkbox_remove_header.SetValue(parent.remove_header)
         self.checkbox_change_env_from.SetValue(parent.change_env_from)
         self.block_list.SetValue(parent.block_list)
 
@@ -406,7 +399,6 @@ class Settings(wx.Dialog):
         self.parent.pop_port = self.ic_pop.GetValue()
         self.parent.start_init = self.radio_start.GetValue()
 
-        self.parent.remove_header = self.checkbox_remove_header.GetValue()
         self.parent.change_env_from = self.checkbox_change_env_from.GetValue()
         self.parent.block_list = self.block_list.GetValue()
 
