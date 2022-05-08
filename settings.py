@@ -195,19 +195,6 @@ class Settings(wx.Dialog):
 
         panel3_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        hbox43 = wx.BoxSizer(wx.HORIZONTAL)
-        text43a = wx.StaticText(panel3, label=_("Send Delay"))
-        hbox43.Add(text43a, flag=wx.LEFT)
-
-        self.send_delay = wx.SpinCtrl(panel3)
-        self.send_delay.SetRange(0,30)
-
-        hbox43.Add(self.send_delay, flag=wx.LEFT, border=5)
-        text43b = wx.StaticText(panel3, label=_("sec"))
-        hbox43.Add(text43b, flag=wx.LEFT, border=5)
-
-        panel3_sizer.Add(hbox43, flag=wx.LEFT|wx.BOTTOM, border=10)
-
         # Remove Header
 
         self.checkbox_remove_header = wx.CheckBox(panel3, label=_("Remove X-Mailer/User-Agent header"))
@@ -290,7 +277,6 @@ class Settings(wx.Dialog):
         else:
             self.radio_stop.SetValue(True)
 
-        self.send_delay.SetValue(parent.send_delay)
         self.checkbox_remove_header.SetValue(parent.remove_header)
         self.checkbox_change_env_from.SetValue(parent.change_env_from)
         self.block_list.SetValue(parent.block_list)
@@ -420,7 +406,6 @@ class Settings(wx.Dialog):
         self.parent.pop_port = self.ic_pop.GetValue()
         self.parent.start_init = self.radio_start.GetValue()
 
-        self.parent.send_delay = self.send_delay.GetValue()
         self.parent.remove_header = self.checkbox_remove_header.GetValue()
         self.parent.change_env_from = self.checkbox_change_env_from.GetValue()
         self.parent.block_list = self.block_list.GetValue()

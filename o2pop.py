@@ -542,7 +542,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
     if not params.parent:
         return 0
 
-    block_smtp = parent.block_smtp
     block_list_parsed = parent.block_list_parsed
 
     rcpt_count = 0
@@ -654,42 +653,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         data.append(s)
         if s == b'.\r\n':
             break
-
-    if parent.send_delay > 0:
-        parent.rcpt_count = rcpt_count
-        parent.env_from = env_from.decode()
-
-        block_smtp.cancel = False
-        block_smtp.run()
-
-        task = asyncio.create_task(asyncio.sleep(60))
-        block_smtp.task = task
-        try:
-            await asyncio.wait_for(task, timeout=None)
-        except asyncio.CancelledError:
-            pass
-
-        if block_smtp.cancel:
-            err = True
-            s = b'451 Requested action aborted\r\n'
-    
-    if err:
-        if verbose:
-            print2("<<!", s)
-        local_writer.write(s)
-        await local_writer.drain()
-
-        s = b'QUIT\r\n'
-        if verbose:
-            print2("!>>", s)
-        remote_writer.write(s)
-        await remote_writer.drain()
-        if remote_reader.at_eof():
-            return 1
-        s = await remote_reader.readline()
-        if verbose:
-            print2("<<<", s)
-        return 1
 
     if parent.remove_header:
         remove_agent_header(data)

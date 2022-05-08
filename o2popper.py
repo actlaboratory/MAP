@@ -34,87 +34,6 @@ builtins.__dict__['_'] = wx.GetTranslation
 
 DEFAULT_BLOCK_LIST = '@gmai.com'
 
-class BlockSmtp:
-    def __init__(self, parent):
-        self.parent = parent
-        self.cancel = False
-        self.task = None
-
-    def run(self):
-        evt = self.parent.block_smtp_event()
-        wx.PostEvent(self.parent, evt)
-
-class SendingDialog(wx.Dialog):
-    def __init__(self, parent, *args, **kw):
-        # self.parent = parent
-        super().__init__(*args, **kw)
-
-        self.SetIcon(parent.icon)
-        self.Bind(wx.EVT_CLOSE, self.on_close)
-
-        main_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        text1 = wx.StaticText(self, label=_("Waiting to be sent..."), size=(250,-1))
-        main_sizer.Add(text1, flag=wx.LEFT|wx.TOP, border=15)
-
-        # -----------------------------------------------------------------
-        self.count = 0
-        self.delay = parent.send_delay
-
-        self.gauge = wx.Gauge(self, range=self.delay, style=wx.GA_HORIZONTAL|wx.GA_PROGRESS)
-        main_sizer.Add((-1, 5))
-        main_sizer.Add(self.gauge, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=15)
-
-        self.Bind(wx.EVT_TIMER, self.on_timer)
-        self.timer = wx.Timer(self)
-        self.timer.Start(1000)
-
-        # -----------------------------------------------------------------
-
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-
-        text21 = wx.StaticText(self, label=_("Envelope-From:"), style=wx.ALIGN_RIGHT)
-        hbox2.Add(text21)
-        s = parent.env_from
-        text22 = wx.StaticText(self, label=s)
-        text22.SetForegroundColour('#0033ff')
-        hbox2.Add(text22, flag=wx.LEFT, border=5)
-
-        main_sizer.Add((-1, 5))
-        main_sizer.Add(hbox2, flag=wx.LEFT|wx.RIGHT, border=15)
-
-        hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-        text31 = wx.StaticText(self, label=_("To+Cc+Bcc:"), size=text21.GetSize(), style=wx.ALIGN_RIGHT)
-        hbox3.Add(text31)
-        s = str(parent.rcpt_count)
-        text32 = wx.StaticText(self, label=s)
-        text32.SetForegroundColour('#0033ff')
-        hbox3.Add(text32, flag=wx.LEFT, border=5)
-
-        main_sizer.Add(hbox3, flag=wx.LEFT|wx.RIGHT, border=15)
-
-        # -----------------------------------------------------------------
-
-        line = wx.StaticLine(self)
-        main_sizer.Add(line, flag=wx.EXPAND|wx.ALL, border=10)
-        button_cancel = wx.Button(self, wx.ID_CANCEL, label=_("Cancel"))
-        main_sizer.Add(button_cancel, flag=wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.ALIGN_RIGHT, border=15)
-        self.SetSizerAndFit(main_sizer)
-        self.Centre()
-
-    def __del__(self):
-        self.timer.Stop()
-
-    def on_timer(self, evt):
-        self.count = self.count + 1
-        if self.count > self.delay:
-            self.EndModal(wx.ID_CLOSE)
-            return
-        self.gauge.SetValue(self.count)
-
-    def on_close(self, evt):
-        self.EndModal(wx.ID_CLOSE)
-
 def get_datadir():
     home = os.path.expanduser('~')
     pf = platform.system()
@@ -182,7 +101,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = ini_data['pop_port']
             self.start_init = ini_data['start_init']
 
-            self.send_delay = ini_data['send_delay']
             self.remove_header = ini_data['remove_header']
             self.change_env_from = ini_data.get('change_env_from', False) # new
             self.block_list = ini_data.get('block_list', DEFAULT_BLOCK_LIST) # new
@@ -203,19 +121,12 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = self.args.pop_port
             self.start_init = False
 
-            self.send_delay = 5
             self.remove_header = False
             self.change_env_from = False
             self.block_list = DEFAULT_BLOCK_LIST
             self.block_list_parsed = parse_block_list(self.block_list)
 
             self.params_info = self.params.info()
-
-        # ------------------------------------------------------------
-
-        self.block_smtp_event, evt_delay = wx.lib.newevent.NewEvent()
-        self.Bind(evt_delay, self.on_delay)
-        self.block_smtp = BlockSmtp(self)
 
         # ------------------------------------------------------------
 
@@ -255,15 +166,6 @@ class MainMenu(wx.adv.TaskBarIcon):
 
         self.params.reset(self)
         self.params_info = self.params.info()
-
-    def on_delay(self, e):
-        dlg = SendingDialog(self, None, title=_("Delay Sending"), style=wx.DEFAULT_DIALOG_STYLE|wx.STAY_ON_TOP)
-        result = dlg.ShowModal()
-        dlg.Destroy()
-
-        if result == wx.ID_CANCEL:
-            self.block_smtp.cancel = True
-        self.task_cancel(self.block_smtp.task)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
@@ -344,7 +246,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             'pop_port': self.pop_port,
             'start_init': self.start_init,
 
-            'send_delay': self.send_delay,
             'remove_header': self.remove_header,
             'change_env_from': self.change_env_from,
             'block_list': self.block_list,
