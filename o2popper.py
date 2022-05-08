@@ -32,8 +32,6 @@ MY_APP_NAME = 'O2Popper'
 import builtins
 builtins.__dict__['_'] = wx.GetTranslation
 
-DEFAULT_BLOCK_LIST = '@gmai.com'
-
 def get_datadir():
     home = os.path.expanduser('~')
     pf = platform.system()
@@ -46,18 +44,6 @@ def get_datadir():
         return os.path.join(home, 'Library', 'Application Support')
     else:
         return ''
-
-def parse_block_list(block_list):
-    if not block_list:
-        return None
-
-    r = []
-    for t in block_list.encode().translate(bytes.maketrans(b',\r\n', b'   ')).lower().split():
-        if t.find(b'@') > 0 and (not t.startswith(b'.')):
-            r.append((t, True))
-        else:
-            r.append((t, False))
-    return r
 
 class MainMenu(wx.adv.TaskBarIcon):
     def __init__(self, frame):
@@ -102,8 +88,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.start_init = ini_data['start_init']
 
             self.change_env_from = ini_data.get('change_env_from', False) # new
-            self.block_list = ini_data.get('block_list', DEFAULT_BLOCK_LIST) # new
-            self.block_list_parsed = None
 
             self.params_info = ''
             self.set_client_config()
@@ -121,8 +105,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.start_init = False
 
             self.change_env_from = False
-            self.block_list = DEFAULT_BLOCK_LIST
-            self.block_list_parsed = parse_block_list(self.block_list)
 
             self.params_info = self.params.info()
 
@@ -159,8 +141,6 @@ class MainMenu(wx.adv.TaskBarIcon):
 
         self.args.no_pop = not self.pop
         self.args.pop_port = self.pop_port
-
-        self.block_list_parsed = parse_block_list(self.block_list)
 
         self.params.reset(self)
         self.params_info = self.params.info()
@@ -245,7 +225,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             'start_init': self.start_init,
 
             'change_env_from': self.change_env_from,
-            'block_list': self.block_list,
         }
 
         if self.client_id:

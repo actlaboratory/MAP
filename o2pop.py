@@ -521,8 +521,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
     if not params.parent:
         return 0
 
-    block_list_parsed = parent.block_list_parsed
-
     rcpt_count = 0
 
     # MAIL FROM: / RCPT TO: / DATA
@@ -556,31 +554,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         elif cmd.startswith(b'rcpt '):
             mail_or_rcpt = True
             rcpt_count += 1
-            if block_list_parsed: # Check block list
-                t = cmd.split(b':', 1)
-                if len(t) == 2:
-                    email = t[1].split()[0].strip(b'<>')
-                else:
-                    email = b''
-
-                matched = False
-                for t, is_email in block_list_parsed:
-                    if is_email:
-                        if t == email:
-                            matched = True
-                            break
-                    else:
-                        if email.endswith(t):
-                            matched = True
-                            break
-                if matched:
-                    err = True
-                    s = b'452 Matched block list\r\n'
-                    if verbose:
-                        print2("<<!", s)
-                    local_writer.write(s)
-                    await local_writer.drain()
-                    break
 
         remote_writer.write(s)
         await remote_writer.drain()

@@ -201,16 +201,6 @@ class Settings(wx.Dialog):
 
         panel3_sizer.Add(self.checkbox_change_env_from, flag=wx.LEFT|wx.BOTTOM, border=10)
 
-        # Block list
-
-        text44 = wx.StaticText(panel3, label=_("Block list:"))
-        panel3_sizer.Add(text44, flag=wx.LEFT, border=10)
-
-        self.block_list = wx.TextCtrl(panel3, style=wx.TE_MULTILINE)
-        panel3_sizer.Add(self.block_list, proportion=1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, border=10)
-
-        panel3.SetSizer(panel3_sizer)
-
         # ----------------------------------------------------------
 
         notebook.AddPage(panel1, _("OAuth2"))
@@ -272,7 +262,6 @@ class Settings(wx.Dialog):
             self.radio_stop.SetValue(True)
 
         self.checkbox_change_env_from.SetValue(parent.change_env_from)
-        self.block_list.SetValue(parent.block_list)
 
         self.tc_path.Bind(wx.EVT_TEXT, self.on_path)
 
@@ -400,6 +389,5 @@ class Settings(wx.Dialog):
         self.parent.start_init = self.radio_start.GetValue()
 
         self.parent.change_env_from = self.checkbox_change_env_from.GetValue()
-        self.parent.block_list = self.block_list.GetValue()
 
         self.EndModal(wx.ID_OK)
