@@ -195,24 +195,6 @@ class Settings(wx.Dialog):
 
         panel3_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # To+Cc Max
-
-        hbox41 = wx.BoxSizer(wx.HORIZONTAL)
-        text41 = wx.StaticText(panel3, label=_("To+Cc Max"))
-        hbox41.Add(text41, flag=wx.LEFT)
-
-        self.to_cc_max = wx.SpinCtrl(panel3)
-        self.to_cc_max.SetRange(0,100)
-
-        hbox41.Add(self.to_cc_max, flag=wx.LEFT, border=5)
-
-        text42 = wx.StaticText(panel3, label=_("Exclude"))
-        hbox41.Add(text42, flag=wx.LEFT, border=10)
-        self.to_cc_exclude = wx.TextCtrl(panel3)
-        hbox41.Add(self.to_cc_exclude, flag=wx.LEFT, border=5, proportion=1)
-
-        panel3_sizer.Add(hbox41, flag=wx.EXPAND|wx.ALL, border=10)
-
         hbox43 = wx.BoxSizer(wx.HORIZONTAL)
         text43a = wx.StaticText(panel3, label=_("Send Delay"))
         hbox43.Add(text43a, flag=wx.LEFT)
@@ -308,8 +290,6 @@ class Settings(wx.Dialog):
         else:
             self.radio_stop.SetValue(True)
 
-        self.to_cc_max.SetValue(parent.to_cc_max)
-        self.to_cc_exclude.SetValue(parent.to_cc_exclude)
         self.send_delay.SetValue(parent.send_delay)
         self.checkbox_remove_header.SetValue(parent.remove_header)
         self.checkbox_change_env_from.SetValue(parent.change_env_from)
@@ -440,8 +420,6 @@ class Settings(wx.Dialog):
         self.parent.pop_port = self.ic_pop.GetValue()
         self.parent.start_init = self.radio_start.GetValue()
 
-        self.parent.to_cc_max = self.to_cc_max.GetValue()
-        self.parent.to_cc_exclude = self.to_cc_exclude.GetValue()
         self.parent.send_delay = self.send_delay.GetValue()
         self.parent.remove_header = self.checkbox_remove_header.GetValue()
         self.parent.change_env_from = self.checkbox_change_env_from.GetValue()

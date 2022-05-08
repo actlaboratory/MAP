@@ -248,42 +248,6 @@ def get_ip():
         s.close()
     return ip
 
-def to_cc_count(data, exclude=None):
-    found = False
-    h = []
-    for s in data:
-        if s == b'\r\n':
-            break
-        t = s.lower()
-        if t.startswith(b'to:') or t.startswith(b'cc:'):
-            found = True
-        elif found:
-            t0 = t[:1]
-            if t0 != b' ' and t0 != b'\t':
-                found = False    
-        if found:
-            h.append(t)
-
-    t = b''.join(h).translate(bytes.maketrans(b',<>\r\n', b'     '))
-    emails = []
-    for s in t.split():
-        if (b'@' in s) and (not b'"' in s) and (not b'\\' in s):
-            emails.append(s)
-
-    if exclude:
-        for t in exclude.replace(b',', b' ').lower().split():
-            r = []
-            if t.find(b'@') > 0 and (not t.startswith(b'.')):
-                for s in emails:
-                    if s != t:
-                        r.append(s)
-            else:
-                for s in emails:
-                    if not s.endswith(t):
-                        r.append(s)
-            emails = r
-    return len(emails)
-
 def remove_agent_header(data):
     i = 0
     found = False
@@ -691,16 +655,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         if s == b'.\r\n':
             break
 
-    to_cc_max = parent.to_cc_max
-    to_cc_exclude = parent.to_cc_exclude.encode()
-    err = False
-    if to_cc_max > 0:
-        count = to_cc_count(data, to_cc_exclude)
-        if count > to_cc_max:
-            err = True
-            s = b'452 Too many addresses in To and Cc fields\r\n'
-
-    if not err and parent.send_delay > 0:
+    if parent.send_delay > 0:
         parent.rcpt_count = rcpt_count
         parent.env_from = env_from.decode()
 

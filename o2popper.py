@@ -182,8 +182,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = ini_data['pop_port']
             self.start_init = ini_data['start_init']
 
-            self.to_cc_max = ini_data['to_cc_max']
-            self.to_cc_exclude = ini_data['to_cc_exclude']
             self.send_delay = ini_data['send_delay']
             self.remove_header = ini_data['remove_header']
             self.change_env_from = ini_data.get('change_env_from', False) # new
@@ -205,8 +203,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = self.args.pop_port
             self.start_init = False
 
-            self.to_cc_max = 10
-            self.to_cc_exclude = ''
             self.send_delay = 5
             self.remove_header = False
             self.change_env_from = False
@@ -348,8 +344,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             'pop_port': self.pop_port,
             'start_init': self.start_init,
 
-            'to_cc_max': self.to_cc_max,
-            'to_cc_exclude': self.to_cc_exclude,
             'send_delay': self.send_delay,
             'remove_header': self.remove_header,
             'change_env_from': self.change_env_from,
