@@ -29,7 +29,6 @@ class Settings(wx.Dialog):
         notebook = wx.Notebook(self)
         panel1 = wx.Panel(notebook)
         panel2 = wx.Panel(notebook)
-        panel3 = wx.Panel(notebook)
 
         main_sizer.Add(notebook, proportion=1, flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, border=8)
 
@@ -193,19 +192,8 @@ class Settings(wx.Dialog):
 
         # ----------------------------------------------------------
 
-        panel3_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Change Envelope-From
-
-        self.checkbox_change_env_from = wx.CheckBox(panel3, label=_("Change Envelope-From"))
-
-        panel3_sizer.Add(self.checkbox_change_env_from, flag=wx.LEFT|wx.BOTTOM, border=10)
-
-        # ----------------------------------------------------------
-
         notebook.AddPage(panel1, _("OAuth2"))
         notebook.AddPage(panel2, _("Listen"))
-        notebook.AddPage(panel3, _("Block SMTP"))
 
         # OK / Cancel
 
@@ -260,8 +248,6 @@ class Settings(wx.Dialog):
             self.radio_start.SetValue(True)
         else:
             self.radio_stop.SetValue(True)
-
-        self.checkbox_change_env_from.SetValue(parent.change_env_from)
 
         self.tc_path.Bind(wx.EVT_TEXT, self.on_path)
 
@@ -387,7 +373,5 @@ class Settings(wx.Dialog):
         self.parent.pop = self.checkbox_pop.GetValue()
         self.parent.pop_port = self.ic_pop.GetValue()
         self.parent.start_init = self.radio_start.GetValue()
-
-        self.parent.change_env_from = self.checkbox_change_env_from.GetValue()
 
         self.EndModal(wx.ID_OK)

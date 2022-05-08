@@ -344,7 +344,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
        print2(">>>", s)
 
     mail_from_buff = b''
-    env_from = b''
 
     cmd = s.lower().rstrip()
     if cmd == b'quit':
@@ -364,7 +363,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         t = s.split(b':', 1)
         if len(t) == 2:
             user = t[1].split()[0].strip(b'<>')
-            env_from = user
         else:
             user = b''
         if verbose: # debug
@@ -449,15 +447,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         # MAIL FROM:
         if mail_from_buff:
             s = mail_from_buff
-            if parent.change_env_from: # Change Envelope-From
-                env_from = user
-                t = s.split(b':', 1)
-                if len(t) == 2:
-                    t1 = t[1].split(b' ', 1)
-                    if len(t1) == 2:
-                        s = b'MAIL FROM:<' + user + b'> ' + t1[1]
-                    else:
-                        s = b'MAIL FROM:<' + user + b'>\r\n'
             if verbose:
                 print2("!>>", s)
             remote_writer.write(s)
@@ -540,17 +529,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
             mail_or_rcpt = True
             t = s.split(b':', 1)
             if len(t) == 2:
-                if parent.change_env_from: # Change Envelope-From
-                    env_from = user
-                    t1 = t[1].split(b' ', 1)
-                    if len(t1) == 2:
-                        s = b'MAIL FROM:<' + user + b'> ' + t1[1]
-                    else:
-                        s = b'MAIL FROM:<' + user + b'>\r\n'
-                    if verbose:
-                        print2("!>>", s)
-                else:
-                    env_from = t[1].split()[0].strip(b'<>')
+                env_from = t[1].split()[0].strip(b'<>')
         elif cmd.startswith(b'rcpt '):
             mail_or_rcpt = True
             rcpt_count += 1

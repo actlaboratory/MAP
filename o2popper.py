@@ -63,7 +63,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pf_windows = False
 
         self.rcpt_count = 0
-        self.env_from = ''
   
         self.args = o2pop.args
         self.params = o2pop.params
@@ -87,8 +86,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop_port = ini_data['pop_port']
             self.start_init = ini_data['start_init']
 
-            self.change_env_from = ini_data.get('change_env_from', False) # new
-
             self.params_info = ''
             self.set_client_config()
         else:
@@ -103,8 +100,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             self.pop = True
             self.pop_port = self.args.pop_port
             self.start_init = False
-
-            self.change_env_from = False
 
             self.params_info = self.params.info()
 
@@ -223,8 +218,6 @@ class MainMenu(wx.adv.TaskBarIcon):
             'pop': self.pop,
             'pop_port': self.pop_port,
             'start_init': self.start_init,
-
-            'change_env_from': self.change_env_from,
         }
 
         if self.client_id:
