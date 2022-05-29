@@ -15,12 +15,9 @@ def get( fileName, need_refresh=False):
 		os.makedirs(constants.GOOGLE_DIR)
 
 	#ファイルがあれば読み込む
-	print(getCredentialPath(fileName))
 	if os.path.isfile(getCredentialPath(fileName)):
-		print("find")
 		try:
 			credential=Credentials.from_authorized_user_file(getCredentialPath(fileName),scopes=constants.GOOGLE_NEED_SCOPES)
-			print(credential)
 			if need_refresh:
 				refresh(credential)
 			return credential
