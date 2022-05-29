@@ -13,21 +13,15 @@ import sys
 import socket
 import argparse
 
-import pickle
-import os
 import base64
-import json
 from google.auth import transport
 
-from google_auth_oauthlib.flow import InstalledAppFlow
+import globalVars
+import googleOAuthUtil
+
 from google.auth.transport.requests import Request
 
-try:
-    import _client_secret_data as client_secret_data
-except ImportError:
-    import client_secret_data
-
-__version__ = '2.0.0'
+__version__ = '3.0.0'
 
 PROG = 'o2pop'
 
@@ -38,8 +32,6 @@ REMOTE_POP_HOST = 'pop.gmail.com'
 REMOTE_POP_PORT = 995
 REMOTE_SMTP_HOST = 'smtp.gmail.com'
 REMOTE_SMTP_PORT = 465
-
-REDIRECT_PORT = 8080
 
 LOCAL_POP_PORT = 8110
 LOCAL_SMTP_PORT = 8025
@@ -141,8 +133,6 @@ async def pop_init(local_reader, local_writer, remote_reader, remote_writer, ver
         print2(">>>", s)
 
     # AUTH
-    if params.email:
-        user = params.email
     token = params.get_token(user.decode()).encode()
 
     auth_string = b'user=%b\1auth=Bearer %b\1\1' % (user, token)
@@ -420,8 +410,6 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
             print2(">>>", s)
 
     # AUTH
-    if params.email:
-        user = params.email
     token = params.get_token(user.decode()).encode()
 
     auth_string = b'user=%b\1auth=Bearer %b\1\1' % (user, token)
@@ -714,8 +702,8 @@ async def main(parent=None):
         else:
             task = asyncio.gather(smtp_server, pop_server)
 
-        parent.loop = loop
-        parent.task = task
+        globalVars.loop = loop
+        globalVars.task = task
 
         try:
             await asyncio.gather(task)
@@ -744,112 +732,33 @@ def parse_hostport(s, default_port=None):
     return (r[0], port)
 
 class Params:
-    def __init__(self, path=None):
+    def __init__(self):
         self.parent = None
-        self.store_dir = ''
-        self.email = None
         self.ip_addr = None
         self.mode = None
-        self.path = path
         self.reset()
 
     def reset(self, parent=None):
-        if self.path:
-            with open(self.path, 'r') as f:
-                self.client_config = json.load(f)
-        else:
-            self.client_config = json.loads(base64.b64decode(client_secret_data.CLIENT_SECRET_DATA))
-
-        config = self.client_config['installed']
-
-        if parent and parent.client_id:
-            self.client_id = config['client_id'] = parent.client_id
-        else:
-            self.client_id = config['client_id']
-        
-        if parent and parent.client_secret:
-            self.client_secret = config['client_secret'] = parent.client_secret
-        else:
-            self.client_secret = config['client_secret']
-
-        if '_scopes' in config:
-            self.scopes = config['_scopes']
-            if len(self.scopes) > 1:
-                os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
-                if self.scopes[1].startswith('https://outlook.office.com/'):
-                    self.mode = MS_MODE
-        else:
-            self.scopes = SCOPES
-
-        if '_pop_server' in config:
-            self.remote_pop_host, self.remote_pop_port = parse_hostport(
-                config['_pop_server'], REMOTE_POP_PORT)
-        else:
-            self.remote_pop_host, self.remote_pop_port = REMOTE_POP_HOST, REMOTE_POP_PORT
-
-        if '_smtp_server' in config:
-            self.remote_smtp_host, self.remote_smtp_port = parse_hostport(
-                config['_smtp_server'], REMOTE_SMTP_PORT)
-        else:
-            self.remote_smtp_host, self.remote_smtp_port = REMOTE_SMTP_HOST, REMOTE_SMTP_PORT
-        
-        if '_redirect_port' in config:
-            self.redirect_port = config['_redirect_port']
-        else:
-            self.redirect_port = REDIRECT_PORT
-
-    def get_token_file(self, user):
-        return os.path.join(self.store_dir, 'token-' + user + '.pickle')
+        import constants
+        self.client_id = constants.GOOGLE_CLIENT_ID
+        self.client_secret = constants.GOOGLE_CLIENT_SECRET_STR
+        self.remote_pop_host = REMOTE_POP_HOST
+        self.remote_pop_port = REMOTE_POP_PORT
+        self.remote_smtp_host = REMOTE_SMTP_HOST
+        self.remote_smtp_port = REMOTE_SMTP_PORT
 
     def get_token(self, user, login_hint=None):
-        token_file = self.get_token_file(user)
-        creds = None
-        if os.path.exists(token_file):
-            with open(token_file, 'rb') as token:
-                creds = pickle.load(token)
-                creds._client_id = self.client_id
-                creds._client_secret = self.client_secret
-
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_config(
-                    self.client_config, self.scopes)
-                kwargs = {}
-                if login_hint or (self.parent and self.parent.login_hint):
-                    kwargs['login_hint'] = user
-                if self.redirect_port != REDIRECT_PORT:
-                    kwargs['port'] = self.redirect_port
-                creds = flow.run_local_server(**kwargs)
-            with open(token_file, 'wb') as token:
-                creds._client_id = '*'
-                creds._client_secret = '*'
-                if self.mode == MS_MODE:
-                    if 'offline_access' in creds._scopes:
-                        creds._scopes.remove('offline_access')
-                pickle.dump(creds, token)
+        if user.startswith("recent:"):
+            user = user[7:]
+            print(user)
+        creds = googleOAuthUtil.get(user, True)
         return creds.token
-
-    def info(self):
-        config = self.client_config['installed']
-        s = (
-            f"_scopes: {self.scopes}\n"
-            f"_pop_server: {self.remote_pop_host}:{self.remote_pop_port}\n"
-            f"_smtp_server: {self.remote_smtp_host}:{self.remote_smtp_port}\n"
-            f"_redirect_port: {self.redirect_port}\n"
-            "\n"
-            f"auth_uri: {config['auth_uri']}\n"
-            f"token_uri: {config['token_uri']}"
-        )
-        return s
 
 parser = argparse.ArgumentParser(prog=PROG)
 parser.add_argument("--version", help="show version and exit",
     action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
     action="store_true")
-parser.add_argument("--email", help="Your email address")
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument("--no_smtp", help="disable smtp proxy", action="store_true")
@@ -857,15 +766,12 @@ group.add_argument("--no_pop", help="disable pop proxy", action="store_true")
 parser.add_argument("--smtp_port", type=int, default=LOCAL_SMTP_PORT, help="smtp listen port (default: %(default)s)")
 parser.add_argument("--pop_port", type=int, default=LOCAL_POP_PORT, help="pop listen port (default: %(default)s)")
 parser.add_argument("--ca_file", help="CA file")
-parser.add_argument("-f", "--client_secret_file", help="client secret file")
 
 args = parser.parse_args()
-params = Params(args.client_secret_file)
+params = Params()
 
-if args.email:
-    params.email = args.email.encode()
-    if args.verbose:
-        print("email:", args.email)
+
+args.verbose = True
 
 if not args.no_smtp:
     params.ip_addr = get_ip()
