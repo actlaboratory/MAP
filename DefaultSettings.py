@@ -11,8 +11,9 @@ class DefaultSettings:
 			"language": "ja-JP",
 			"fileVersion": "100",
 			"locale": "ja-JP",
-			"log_level": "0",
+			"log_level": "20",
 			"auto_start_server": False,
+			"minimizeonexit": True,
 		}
 		config["view"]={
 			"font": "bold 'ＭＳ ゴシック' 22 windows-932",
