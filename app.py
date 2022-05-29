@@ -10,10 +10,9 @@ import winerror
 import AppBase
 import constants
 import globalVars
-import o2pop
+
 import pipe
 import proxyUtil
-import runner
 import update
 
 class Main(AppBase.MainBase):
@@ -115,6 +114,7 @@ class Main(AppBase.MainBase):
 		"""
 			ソフト開始時の起動処理
 		"""
+		import runner
 		globalVars.event = threading.Event()
 		globalVars.runnerThread = runner.O2popRunner()
 		globalVars.runnerThread.start()
@@ -123,12 +123,14 @@ class Main(AppBase.MainBase):
 		globalVars.event.set()
 
 	def stopServer(self, event=None):
+		import o2pop
 		o2pop.task_cancel(globalVars.loop, globalVars.task)
 
 	def stopRunner(self):
 		"""
 			ソフト終了時の停止処理
 		"""
+		import o2pop
 		globalVars.runnerThread.exitFlag = True
 		if globalVars.runnerThread.isRunning:
 			o2pop.task_cancel(globalVars.loop, globalVars.task)

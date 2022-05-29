@@ -2,10 +2,13 @@
 # o2pop.py
 #
 # Copyright (c) 2020-2021 MURATA Yasuhisa
+# Copyright (c) 2022 yamahubuki, ACT Laboratory
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 #
+
+import constants
 
 import asyncio
 import ssl
@@ -20,6 +23,7 @@ import globalVars
 import googleOAuthUtil
 
 from google.auth.transport.requests import Request
+from logging import getLogger
 
 __version__ = '3.0.0'
 
@@ -38,8 +42,11 @@ LOCAL_SMTP_PORT = 8025
 
 MS_MODE = 1
 
+log = getLogger("%s.%s" % (constants.LOG_PREFIX,"o2pop"))
+
+
 def print2(label, s):
-    print(f'{label} {s}')
+    log.debug(f'{label} {s}')
 
 async def pop_init(local_reader, local_writer, remote_reader, remote_writer, verbose=None):
     # <<< +OK ... ready
@@ -199,7 +206,7 @@ async def handle_pop(local_reader, local_writer):
             ctx.load_verify_locations(cafile=args.ca_file)
 
         if args.verbose:
-            print("Connect to " + params.remote_pop_host + ":" + str(params.remote_pop_port))
+            log.info("Connect to " + params.remote_pop_host + ":" + str(params.remote_pop_port))
 
         remote_writer = None
         remote_reader, remote_writer = await asyncio.open_connection(
@@ -218,7 +225,7 @@ async def handle_pop(local_reader, local_writer):
         await asyncio.gather(pipe1, pipe2)
 
     except Exception as ex:
-        print(sys.exc_info()[0].__name__ + ":", ex)
+        log.error(sys.exc_info()[0].__name__ + ":" + str(ex))
         local_writer.write(b'-ERR\r\n')
         await local_writer.drain()
 
@@ -356,7 +363,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         else:
             user = b''
         if verbose: # debug
-            print('User:', user)
+            log.info('User:' + user)
     elif cmd.startswith(b'auth plain '):
         t = base64.b64decode(s[11:]).split(b'\0')
         if len(t) == 3:
@@ -364,7 +371,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         else:
             user = b''
         if verbose: # debug
-            print('User:', user)
+            log.info('User:' + user)
     elif cmd.startswith(b'auth plain'):
         s = b'334\r\n'
         if verbose:
@@ -382,7 +389,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         else:
             user = b''
         if verbose: # debug
-            print('User:', user)
+            log.info('User:' + user)
     elif cmd.startswith(b'auth login'):
         s = b'334 VXNlcm5hbWU6\r\n' # 'Username:'
         if verbose:
@@ -396,7 +403,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
             print2(">>>", s)
         user = base64.b64decode(s)
         if verbose: # debug
-            print('User:', user)
+            log.info('User:' + user)
 
         s = b'334 UGFzc3dvcmQ6\r\n' # 'Password:'
         if verbose:
@@ -638,7 +645,7 @@ async def handle_smtp(local_reader, local_writer):
             start_tls_ctx = None
 
         if args.verbose:
-            print("Connect to " + params.remote_smtp_host + ":" + str(params.remote_smtp_port))
+            log.info("Connect to " + params.remote_smtp_host + ":" + str(params.remote_smtp_port))
 
         remote_writer = None
         remote_reader, remote_writer = await asyncio.open_connection(
@@ -657,7 +664,7 @@ async def handle_smtp(local_reader, local_writer):
         await asyncio.gather(pipe1, pipe2)
 
     except Exception as ex:
-        print(sys.exc_info()[0].__name__ + ":", ex)
+        log.error(sys.exc_info()[0].__name__ + ":" + str(ex))
         s = b'451 Requested action aborted\r\n'
         if args.verbose:
             print2("<<<", s)
@@ -673,7 +680,7 @@ async def start_server(handle, host, port, name):
     server = await asyncio.start_server(handle, host, port)
     addr = server.sockets[0].getsockname()
     if args.verbose:
-        print(f'Serving on {addr}: {name}')
+        log.info(f'Serving on {addr}: {name}')
     async with server:
         await server.serve_forever()
 
@@ -684,7 +691,7 @@ async def main(parent=None):
         pop_server = start_server(handle_pop, LOCAL_HOST, args.pop_port, 'pop')
     if not args.no_smtp:
         if args.verbose:
-            print('local ip:', params.ip_addr)
+            log.info('local ip:' + params.ip_addr)
         smtp_server = start_server(handle_smtp, LOCAL_HOST, args.smtp_port, 'smtp')
     
     if parent is None:
@@ -715,10 +722,10 @@ def task_cancel(loop, task):
 
 def run_main(coro):
     if args.verbose: # debug
-        print('=== Start ===')
+        log.info('=== Start ===')
     asyncio.run(coro)
     if args.verbose: # debug
-        print('=== Stop ===')
+        log.info('=== Stop ===')
 
 def parse_hostport(s, default_port=None):
     r = s.rsplit(":", 1)
@@ -739,7 +746,6 @@ class Params:
         self.reset()
 
     def reset(self, parent=None):
-        import constants
         self.client_id = constants.GOOGLE_CLIENT_ID
         self.client_secret = constants.GOOGLE_CLIENT_SECRET_STR
         self.remote_pop_host = REMOTE_POP_HOST
@@ -750,7 +756,6 @@ class Params:
     def get_token(self, user, login_hint=None):
         if user.startswith("recent:"):
             user = user[7:]
-            print(user)
         creds = googleOAuthUtil.get(user, True)
         return creds.token
 
