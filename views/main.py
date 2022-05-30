@@ -213,6 +213,8 @@ class Events(BaseEvents):
 
 	def onMenuOpen(self, event):
 		menu = event.GetMenu()
+		if not menu:
+			event.Skip()
 		for item in menu.GetMenuItems():
 			if item.GetId()	 == menuItemsStore.getRef("START"):
 				item.Enable(not globalVars.runnerThread.isRunning)
