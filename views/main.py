@@ -215,6 +215,7 @@ class Events(BaseEvents):
 		menu = event.GetMenu()
 		if not menu:
 			event.Skip()
+			return
 		for item in menu.GetMenuItems():
 			if item.GetId()	 == menuItemsStore.getRef("START"):
 				item.Enable(not globalVars.runnerThread.isRunning)
