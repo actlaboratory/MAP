@@ -5,6 +5,7 @@
 
 import os
 import wx
+import win32com
 
 import constants
 import globalVars

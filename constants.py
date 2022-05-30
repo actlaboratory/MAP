@@ -8,7 +8,7 @@ import wx
 APP_FULL_NAME = "Mail Authorization Proxy"#アプリケーションの完全な名前
 APP_NAME="MAP"#アプリケーションの名前
 APP_ICON = None
-APP_VERSION="0.1.0"
+APP_VERSION="0.1.1"
 APP_LAST_RELEASE_DATE="2022-05-31"
 APP_COPYRIGHT_YEAR="2022"
 APP_LICENSE="MIT License"
@@ -37,7 +37,7 @@ HALF_CHECKED=wx.CHK_UNDETERMINED
 FULL_CHECKED=wx.CHK_CHECKED
 
 #build関連定数
-BASE_PACKAGE_URL = None
+BASE_PACKAGE_URL = "https://github.com/actlaboratory/MAP/releases/download/0.1.0/MAP-0.1.0.zip"
 PACKAGE_CONTAIN_ITEMS = ()#パッケージに含めたいファイルやfolderがあれば指定
 NEED_HOOKS = ()#pyinstallerのhookを追加したい場合は指定
 STARTUP_FILE = "MAP.py"#起動用ファイルを指定
