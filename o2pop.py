@@ -756,6 +756,7 @@ class Params:
     def get_token(self, user, login_hint=None):
         if user.startswith("recent:"):
             user = user[7:]
+        log.debug("get token:"+user)
         creds = googleOAuthUtil.get(user, True)
         return creds.token
 
