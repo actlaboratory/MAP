@@ -1,7 +1,7 @@
 		Mail Authorization Proxy -MAP-
 
-	バージョン:　　ver.0.1.1
-	リリース:　　　2022-05-31
+	バージョン:　　ver.0.1.2
+	リリース:　　　2022-06-08
 	開発・配布元:　ACT Laboratory　(https://actlab.org/)
 	主要開発者:　　吹雪
 　　ソフト種別:　　オープンソースソフトウェア　(GitHubリポジトリ:https://github.com/actlaboratory/MAP/)
