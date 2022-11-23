@@ -4,7 +4,8 @@ winpaths
 pyinstaller==5.3
 pyperclip
 requests
-requests-oauthlib
+requests-oauthlib == 1.3.0
+google_auth == 1.21.2
 google-api-python-client == 1.10
 https://github.com/actlaboratory/proxyUtil/archive/0.2.4.zip
 https://github.com/actlaboratory/diff_archiver/archive/v1.0.1.zip

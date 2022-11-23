@@ -9,6 +9,12 @@ import errorCodes
 
 import google.auth.transport.requests
 
+from logging import getLogger
+
+
+log = getLogger("%s.%s" % (constants.LOG_PREFIX,"o2pop"))
+
+
 def get( fileName, need_refresh=False):
 	#ディレクトリがなければ作る
 	if not os.path.exists(constants.GOOGLE_DIR):
@@ -23,6 +29,8 @@ def get( fileName, need_refresh=False):
 			return credential
 		except ValueError:
 			pass
+	else:
+		log.info("credential file not found:" + getCredentialPath(fileName))
 	return None
 
 def MakeFlow():
@@ -68,4 +76,4 @@ def Authorize(credential):
 	return header
 
 def getCredentialPath(fileName):
-	return os.path.join(constants.GOOGLE_DIR, fileName)
+	return os.path.abspath(os.path.join(constants.GOOGLE_DIR, fileName))

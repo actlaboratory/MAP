@@ -8,8 +8,8 @@ import wx
 APP_FULL_NAME = "Mail Authorization Proxy"#アプリケーションの完全な名前
 APP_NAME="MAP"#アプリケーションの名前
 APP_ICON = None
-APP_VERSION="0.1.1"
-APP_LAST_RELEASE_DATE="2022-05-31"
+APP_VERSION="0.1.2"
+APP_LAST_RELEASE_DATE="2022-06-08"
 APP_COPYRIGHT_YEAR="2022"
 APP_LICENSE="MIT License"
 APP_DEVELOPERS="yamahubuki, ACT Laboratory"

@@ -363,7 +363,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         else:
             user = b''
         if verbose: # debug
-            log.info('User:' + user)
+            log.info('User:' + user.decode())
     elif cmd.startswith(b'auth plain '):
         t = base64.b64decode(s[11:]).split(b'\0')
         if len(t) == 3:
@@ -371,7 +371,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         else:
             user = b''
         if verbose: # debug
-            log.info('User:' + user)
+            log.info('User:' + user.decode())
     elif cmd.startswith(b'auth plain'):
         s = b'334\r\n'
         if verbose:
@@ -389,7 +389,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
         else:
             user = b''
         if verbose: # debug
-            log.info('User:' + user)
+            log.info('User:' + user.decode())
     elif cmd.startswith(b'auth login'):
         s = b'334 VXNlcm5hbWU6\r\n' # 'Username:'
         if verbose:
@@ -403,7 +403,7 @@ async def smtp_init(local_reader, local_writer, remote_reader, remote_writer, st
             print2(">>>", s)
         user = base64.b64decode(s)
         if verbose: # debug
-            log.info('User:' + user)
+            log.info('User:' + user.decode())
 
         s = b'334 UGFzc3dvcmQ6\r\n' # 'Password:'
         if verbose:
@@ -756,6 +756,7 @@ class Params:
     def get_token(self, user, login_hint=None):
         if user.startswith("recent:"):
             user = user[7:]
+        log.debug("get token:"+user)
         creds = googleOAuthUtil.get(user, True)
         return creds.token
 
