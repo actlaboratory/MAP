@@ -15,7 +15,7 @@ import ssl
 import sys
 import socket
 import argparse
-
+import traceback
 import base64
 from google.auth import transport
 
@@ -210,7 +210,7 @@ async def handle_pop(local_reader, local_writer):
 
         remote_writer = None
         remote_reader, remote_writer = await asyncio.open_connection(
-            params.remote_pop_host, params.remote_pop_port, ssl=ctx)
+            params.remote_pop_host, params.remote_pop_port, ssl=ctx, limit = 32*1024*1024)
 
         res = await pop_init(local_reader, local_writer, remote_reader, remote_writer, args.verbose)
         if res > 0:
@@ -226,6 +226,7 @@ async def handle_pop(local_reader, local_writer):
 
     except Exception as ex:
         log.error(sys.exc_info()[0].__name__ + ":" + str(ex))
+        log.error(traceback.format_exc())
         local_writer.write(b'-ERR\r\n')
         await local_writer.drain()
 
@@ -649,7 +650,7 @@ async def handle_smtp(local_reader, local_writer):
 
         remote_writer = None
         remote_reader, remote_writer = await asyncio.open_connection(
-            params.remote_smtp_host, params.remote_smtp_port, ssl=ctx)
+            params.remote_smtp_host, params.remote_smtp_port, ssl=ctx, limit = 32*1024*1024)
 
         res = await smtp_init(local_reader, local_writer, remote_reader, remote_writer, start_tls_ctx=start_tls_ctx, verbose=args.verbose)
         if res > 0:
